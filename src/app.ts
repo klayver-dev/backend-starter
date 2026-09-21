@@ -2,30 +2,14 @@ import cookie from '@fastify/cookie';
 import Fastify from 'fastify';
 import { createAuthModule } from './containers/auth-container.js';
 import { createUsersModule } from './containers/users-container.js';
-import { ForbiddenError } from './errors/forbidden-error.js';
-import { UnauthorizedError } from './errors/unauthorized-error.js';
+import { registerErrorHandler } from './error-handler.js';
+import { registerSwagger } from './swagger.js';
 
 const app = Fastify();
 
 app.register(cookie);
-
-app.setErrorHandler((error, request, reply) => {
-  if (error instanceof UnauthorizedError) {
-    return reply.status(401).send({
-      message: error.message,
-    });
-  }
-
-  if (error instanceof ForbiddenError) {
-    return reply.status(403).send({
-      message: error.message,
-    });
-  }
-
-  return reply.status(500).send({
-    message: 'Erro interno do servidor.',
-  });
-});
+await registerSwagger(app);
+registerErrorHandler(app);
 
 const authRoutes = createAuthModule();
 const usersRoutes = createUsersModule();

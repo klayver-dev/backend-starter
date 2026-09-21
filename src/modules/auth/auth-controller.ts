@@ -1,14 +1,23 @@
 import type { FastifyReply } from 'fastify';
+
 import { clearAuthCookie, setAuthCookie } from '../../lib/cookie.js';
+
 import type { LoginData, RegisterData, ResetPasswordData } from './auth-schema.js';
+
 import type { AuthService } from './auth-service.js';
 
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   async register(data: RegisterData, reply: FastifyReply) {
-    const result = await this.authService.register(data);
-    return reply.send({ result });
+    const user = await this.authService.register(data);
+
+    return reply.send({
+      message: 'Cadastro realizado com sucesso!',
+      data: {
+        user,
+      },
+    });
   }
 
   async login(data: LoginData, reply: FastifyReply) {
@@ -16,13 +25,23 @@ export class AuthController {
 
     setAuthCookie(reply, token);
 
-    return reply.send({ user });
+    return reply.send({
+      message: 'Login realizado com sucesso!',
+      data: {
+        user,
+      },
+    });
   }
 
   async me(id: string, reply: FastifyReply) {
     const user = await this.authService.me(id);
 
-    return reply.send({ user });
+    return reply.send({
+      message: 'Usuário encontrado.',
+      data: {
+        user,
+      },
+    });
   }
 
   async logout(reply: FastifyReply) {
@@ -30,6 +49,7 @@ export class AuthController {
 
     return reply.send({
       message: 'Logout realizado com sucesso!',
+      data: null,
     });
   }
 
@@ -38,6 +58,7 @@ export class AuthController {
 
     return reply.send({
       message: 'Se o e-mail estiver cadastrado, você receberá um link para redefinir sua senha.',
+      data: null,
     });
   }
 
@@ -46,6 +67,7 @@ export class AuthController {
 
     return reply.send({
       message: 'Senha redefinida com sucesso.',
+      data: null,
     });
   }
 }

@@ -1,12 +1,16 @@
 import bcrypt from 'bcrypt';
+
 import { UnauthorizedError } from '../../errors/unauthorized-error.js';
 import { generateToken } from '../../lib/jwt.js';
+
 import {
   generatePasswordResetToken,
   hashPasswordResetToken,
 } from '../../lib/password-reset-token.js';
+
 import type { EmailService } from '../../services/email-service.js';
 import type { AuthRepository } from './auth-repository.js';
+
 import type { LoginData, RegisterData, ResetPasswordData } from './auth-schema.js';
 
 export class AuthService {
@@ -16,9 +20,6 @@ export class AuthService {
   ) {}
 
   async register(data: RegisterData) {
-    // verificar se o email existe
-    // se não existir cadastra
-
     const existingUser = await this.authRepository.findByEmail(data.email);
 
     if (existingUser) {
@@ -34,12 +35,9 @@ export class AuthService {
     });
 
     return {
-      message: 'Cadastro realizado com sucesso!',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
+      id: user.id,
+      name: user.name,
+      email: user.email,
     };
   }
 
@@ -60,7 +58,6 @@ export class AuthService {
 
     return {
       user: {
-        message: 'Login realizado com sucesso!',
         id: user.id,
         name: user.name,
         email: user.email,
@@ -98,8 +95,8 @@ export class AuthService {
 
     await this.authRepository.createPasswordResetToken({
       userId: user.id,
-      tokenHash: tokenHash,
-      expiresAt: expiresAt,
+      tokenHash,
+      expiresAt,
     });
 
     await this.emailService.sendPasswordResetEmail(user.email, token);
