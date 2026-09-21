@@ -1,8 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { UserRole } from '../../authorization/roles.js';
 import { authMiddleware } from '../../middlewares/auth-middleware.js';
-import { requireRole } from '../../middlewares/authorization-middleware.js';
 
 import { updatePasswordSchema, updateProfileSchema } from './users-schema.js';
 
@@ -82,19 +80,6 @@ export class UsersRoutes {
         }
 
         return this.usersController.updatePassword(request.user.id, req.data, reply);
-      },
-    );
-
-    app.get(
-      '/admin/test',
-      {
-        preHandler: [authMiddleware, requireRole(this.authorizationService, UserRole.ADMIN)],
-      },
-      async (_request, reply) => {
-        return reply.send({
-          message: 'Você é administrador.',
-          data: null,
-        });
       },
     );
   }
