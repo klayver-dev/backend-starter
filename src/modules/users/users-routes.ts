@@ -6,10 +6,14 @@ import { updatePasswordSchema, updateProfileSchema } from './users-schema.js';
 
 import { UserRole } from '../../authorization/roles.js';
 import { requireRole } from '../../middlewares/authorization-middleware.js';
+import type { AuthorizationService } from '../authorization/authorization-service.js';
 import type { UsersController } from './users-controller.js';
 
 export class UsersRoutes {
-  constructor(private readonly usersController: UsersController) {}
+  constructor(
+    private readonly usersController: UsersController,
+    private readonly authorizationService: AuthorizationService,
+  ) {}
 
   register(app: FastifyInstance) {
     app.get(
@@ -73,7 +77,7 @@ export class UsersRoutes {
     app.get(
       '/admin/test',
       {
-        preHandler: [authMiddleware, requireRole(UserRole.ADMIN)],
+        preHandler: [authMiddleware, requireRole(this.authorizationService, UserRole.ADMIN)],
       },
       async (request, reply) => {
         return reply.send({
