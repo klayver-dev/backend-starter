@@ -30,7 +30,7 @@ export class UsersService {
       throw new Error('Usuário não encontrado.');
     }
 
-    if (data.email !== user.email) {
+    if (data.email !== undefined && data.email !== user.email) {
       const emailAlreadyExists = await this.usersRepository.findByEmail(data.email);
 
       if (emailAlreadyExists) {

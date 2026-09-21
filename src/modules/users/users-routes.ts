@@ -1,11 +1,17 @@
 import type { FastifyInstance } from 'fastify';
 
+import { UserRole } from '../../authorization/roles.js';
 import { authMiddleware } from '../../middlewares/auth-middleware.js';
+import { requireRole } from '../../middlewares/authorization-middleware.js';
 
 import { updatePasswordSchema, updateProfileSchema } from './users-schema.js';
 
-import { UserRole } from '../../authorization/roles.js';
-import { requireRole } from '../../middlewares/authorization-middleware.js';
+import {
+  getProfileRouteSchema,
+  updatePasswordRouteSchema,
+  updateProfileRouteSchema,
+} from './users-swagger.js';
+
 import type { AuthorizationService } from '../authorization/authorization-service.js';
 import type { UsersController } from './users-controller.js';
 
@@ -20,6 +26,7 @@ export class UsersRoutes {
       '/users/me',
       {
         preHandler: authMiddleware,
+        schema: getProfileRouteSchema,
       },
       async (request, reply) => {
         return this.usersController.getProfile(request.user.id, reply);
@@ -30,6 +37,7 @@ export class UsersRoutes {
       '/users/me',
       {
         preHandler: authMiddleware,
+        schema: updateProfileRouteSchema,
       },
       async (request, reply) => {
         const req = updateProfileSchema.safeParse(request.body);
@@ -41,8 +49,9 @@ export class UsersRoutes {
           }));
 
           return reply.status(400).send({
-            message: 'Dados inválidos!',
+            message: 'Dados inválidos.',
             errors,
+            data: null,
           });
         }
 
@@ -54,6 +63,7 @@ export class UsersRoutes {
       '/users/me/password',
       {
         preHandler: authMiddleware,
+        schema: updatePasswordRouteSchema,
       },
       async (request, reply) => {
         const req = updatePasswordSchema.safeParse(request.body);
@@ -65,8 +75,9 @@ export class UsersRoutes {
           }));
 
           return reply.status(400).send({
-            message: 'Dados inválidos!',
+            message: 'Dados inválidos.',
             errors,
+            data: null,
           });
         }
 
@@ -79,9 +90,10 @@ export class UsersRoutes {
       {
         preHandler: [authMiddleware, requireRole(this.authorizationService, UserRole.ADMIN)],
       },
-      async (request, reply) => {
+      async (_request, reply) => {
         return reply.send({
           message: 'Você é administrador.',
+          data: null,
         });
       },
     );

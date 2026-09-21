@@ -11,7 +11,10 @@ export class UsersController {
     const user = await this.usersService.getProfile(userId);
 
     return reply.send({
-      user,
+      message: 'Usuário encontrado.',
+      data: {
+        user,
+      },
     });
   }
 
@@ -19,7 +22,10 @@ export class UsersController {
     const user = await this.usersService.updateProfile(userId, data);
 
     return reply.send({
-      user,
+      message: 'Perfil atualizado com sucesso.',
+      data: {
+        user,
+      },
     });
   }
 
@@ -28,6 +34,7 @@ export class UsersController {
 
     return reply.send({
       message: 'Senha alterada com sucesso.',
+      data: null,
     });
   }
 }
