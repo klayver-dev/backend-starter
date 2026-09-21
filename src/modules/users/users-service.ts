@@ -1,5 +1,8 @@
 import bcrypt from 'bcrypt';
 
+import { BadRequestError } from '../../errors/bad-request-error.js';
+import { NotFoundError } from '../../errors/not-found-error.js';
+
 import type { UpdatePasswordData, UpdateProfileData } from './users-schema.js';
 
 import type { UsersRepository } from './users-repository.js';
@@ -11,7 +14,7 @@ export class UsersService {
     const user = await this.usersRepository.findById(userId);
 
     if (!user) {
-      throw new Error('Usuário não encontrado.');
+      throw new NotFoundError('Usuário não encontrado.');
     }
 
     return {
@@ -27,14 +30,14 @@ export class UsersService {
     const user = await this.usersRepository.findById(userId);
 
     if (!user) {
-      throw new Error('Usuário não encontrado.');
+      throw new NotFoundError('Usuário não encontrado.');
     }
 
     if (data.email !== undefined && data.email !== user.email) {
       const emailAlreadyExists = await this.usersRepository.findByEmail(data.email);
 
       if (emailAlreadyExists) {
-        throw new Error('E-mail já cadastrado.');
+        throw new BadRequestError('E-mail já cadastrado.');
       }
     }
 
@@ -51,13 +54,13 @@ export class UsersService {
     const user = await this.usersRepository.findById(userId);
 
     if (!user) {
-      throw new Error('Usuário não encontrado.');
+      throw new NotFoundError('Usuário não encontrado.');
     }
 
     const passwordMatches = await bcrypt.compare(data.currentPassword, user.password);
 
     if (!passwordMatches) {
-      throw new Error('Senha atual inválida.');
+      throw new BadRequestError('Senha atual inválida.');
     }
 
     const passwordHash = await bcrypt.hash(data.newPassword, 10);

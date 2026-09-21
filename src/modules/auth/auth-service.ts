@@ -1,6 +1,9 @@
 import bcrypt from 'bcrypt';
 
+import { BadRequestError } from '../../errors/bad-request-error.js';
+import { NotFoundError } from '../../errors/not-found-error.js';
 import { UnauthorizedError } from '../../errors/unauthorized-error.js';
+
 import { generateToken } from '../../lib/jwt.js';
 
 import {
@@ -23,7 +26,7 @@ export class AuthService {
     const existingUser = await this.authRepository.findByEmail(data.email);
 
     if (existingUser) {
-      throw new Error('E-mail já cadastrado!');
+      throw new BadRequestError('E-mail já cadastrado!');
     }
 
     const passwordHash = await bcrypt.hash(data.password, 10);
@@ -45,13 +48,13 @@ export class AuthService {
     const user = await this.authRepository.findByEmail(data.email);
 
     if (!user) {
-      throw new Error('E-mail ou senha inválidos!');
+      throw new UnauthorizedError('E-mail ou senha inválidos!');
     }
 
     const passwordMatches = await bcrypt.compare(data.password, user.password);
 
     if (!passwordMatches) {
-      throw new Error('E-mail ou senha inválidos!');
+      throw new UnauthorizedError('E-mail ou senha inválidos!');
     }
 
     const token = generateToken(user.id);
@@ -70,7 +73,7 @@ export class AuthService {
     const user = await this.authRepository.findById(id);
 
     if (!user) {
-      throw new Error('Usuário não encontrado!');
+      throw new NotFoundError('Usuário não encontrado!');
     }
 
     return {
